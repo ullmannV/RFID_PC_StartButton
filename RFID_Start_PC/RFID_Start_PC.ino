@@ -17,9 +17,8 @@ const uint8_t output_pins[] = {
 /* Init (Executed once) Code */
 void setup(void) {
   /* set all OUTPUT pins as OUTPUT */
-  for (auto pin : output_pins) {
+  for (auto pin : output_pins) 
     pinMode(pin, OUTPUT);
-  }
 }
 
 /* Endlessly running code */
