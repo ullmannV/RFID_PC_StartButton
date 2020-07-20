@@ -5,12 +5,14 @@
 #include <deprecated.h>
 /* END of Dependencies */
 
-#define UID_WIDTH 4
-
 /* Constants */
+
+constexpr auto UID_WIDTH = 4;
+
 enum { MFRC522_SPI_SS, MFRC522_RST, PWR_BTN }; /* Enumerate of OUTPUT pins name */
 
-const uint8_t output_pins[] = { /* Array of OUTPUT pins */
+/* Array of OUTPUT pins */
+const uint8_t output_pins[] = { 
   3, /* MFRC522_SPI_SS - SlaveSelect SPI pin for MFRC522 */
   4, /* MFRC522_RST    - Pin for resetting MFRC522 */
   5  /* PWR_BTN        - Pin that is connected as substitute of the signal from case's power button */
@@ -44,7 +46,7 @@ void loop(void) {
       /* Read card UID */
       if (!reader.PICC_ReadCardSerial()) 
         return; /* if the reading fails walk program again */
-      for (uint8_t i = 0; i < UID_WIDTH; i++)
+      for (auto i = 0; i < UID_WIDTH; i++)
         card_uid[i] = reader.uid.uidByte[i];
       
       /* Print Read UID */
