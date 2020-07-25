@@ -43,6 +43,7 @@ void readCard(void) {
 // END OF DEBUG      
       /* END of READING */
       reader.PICC_HaltA();
+  }
 }
 
 /* Execution order */
@@ -67,6 +68,5 @@ void loop(void) {
   readCard();
 
 // TODO start the PC with "PWR_BTN" pin
-  }
-      
+    
 }
