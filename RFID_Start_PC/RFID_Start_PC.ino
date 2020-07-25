@@ -13,9 +13,9 @@ enum { MFRC522_SPI_SS, MFRC522_RST, PWR_BTN }; /* Enumerate of OUTPUT pins names
 
 /* Array of OUTPUT pins */
 const uint8_t output_pins[] = { 
-  3, /* MFRC522_SPI_SS - SlaveSelect SPI pin for MFRC522 */
-  4, /* MFRC522_RST    - Pin for resetting MFRC522 */
-  5  /* PWR_BTN        - Pin that is connected as substitute of the signal from case's power button */
+  10, /* MFRC522_SPI_SS - SlaveSelect SPI pin for MFRC522 */
+  2,  /* MFRC522_RST    - Pin for resetting MFRC522 */
+  5   /* PWR_BTN        - Pin that is connected as substitute of the signal from case's power button */
   };
   
 const uint8_t target_uid[UID_WIDTH]; /* UID of the only working card */
@@ -24,47 +24,48 @@ const uint8_t target_uid[UID_WIDTH]; /* UID of the only working card */
 MFRC522 reader(output_pins[MFRC522_SPI_SS], output_pins[MFRC522_RST]);
 
 /* My Functions */
-void readCard(void) {
+//TODO make reader local variable: void readCard(MFRC522 *reader) 
+void readCard(void) {  
+  uint8_t card_uid[UID_WIDTH];
   /* Test whether a card is present */
-  if (reader.PICC_IsNewCardPresent()) {
-      uint8_t card_uid[UID_WIDTH];
-      
-      /* Read card UID */
-      if (!reader.PICC_ReadCardSerial()) 
-        return; /* if the reading fails walk program again */
-      for (auto i = 0; i < UID_WIDTH; i++)
-        card_uid[i] = reader.uid.uidByte[i];
-      
-      /* Print Read UID */
-// DEBUG      
-      for (auto uid_byte : card_uid)
-        Serial.print(uid_byte, HEX);
-      Serial.println("");
-// END OF DEBUG      
-      /* END of READING */
-      reader.PICC_HaltA();
+  /* Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle. */
+  if ( ! reader.PICC_IsNewCardPresent()) {
+    return;
   }
-}
+  
+  /* Select one of the cards */
+  if ( ! reader.PICC_ReadCardSerial()) {
+    return;
+  }
+  /* Properly end communication */
+  reader.PICC_HaltA();
 
-/* Execution order */
+  /* Display UID */
+  for (auto uidByte : reader.uid.uidByte) {
+    Serial.print(uidByte);
+    Serial.print(" ");
+  }
+  Serial.println("");
+}
 
 /* Init (Executed once) Code */
 void setup(void) {
-  reader.PCD_Init(); /* start reader */
-  //reader.PCD_SetAntennaGain(reader.RxGain_max); /* extend Antenna's reading range */
-
-// DEBUG
+  /* set all OUTPUT pins as OUTPUT - MUST BE DONE AS THE FIRST IN setup() */
+  for (auto pin : output_pins) 
+    pinMode(pin, OUTPUT);
+  // DEBUG
   Serial.begin(9600);
 // END OF DEBUG
 
-  /* set all OUTPUT pins as OUTPUT */
-  for (auto pin : output_pins) 
-    pinMode(pin, OUTPUT);
+  SPI.begin();
+  reader.PCD_Init(); /* start reader */
+  reader.PCD_SetAntennaGain(reader.RxGain_max); /* extend Antenna's reading range */  
+  
+  Serial.println("Setup Finished");
 }
 
 /* Endlessly running code */
-void loop(void) { 
-
+void loop(void) {
   readCard();
 
 // TODO start the PC with "PWR_BTN" pin
