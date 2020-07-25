@@ -9,7 +9,7 @@
 
 constexpr auto UID_WIDTH = 4;
 
-enum { MFRC522_SPI_SS, MFRC522_RST, PWR_BTN }; /* Enumerate of OUTPUT pins name */
+enum { MFRC522_SPI_SS, MFRC522_RST, PWR_BTN }; /* Enumerate of OUTPUT pins names */
 
 /* Array of OUTPUT pins */
 const uint8_t output_pins[] = { 
@@ -23,22 +23,8 @@ const uint8_t target_uid[UID_WIDTH]; /* UID of the only working card */
 /* Global variables and objects */
 MFRC522 reader(output_pins[MFRC522_SPI_SS], output_pins[MFRC522_RST]);
 
-/* Init (Executed once) Code */
-void setup(void) {
-  reader.PCD_Init(); /* start reader */
-  //reader.PCD_SetAntennaGain(reader.RxGain_max); /* extend Antenna's reading range */
-
-// DEBUG
-  Serial.begin(9600);
-// END OF DEBUG
-
-  /* set all OUTPUT pins as OUTPUT */
-  for (auto pin : output_pins) 
-    pinMode(pin, OUTPUT);
-}
-
-/* Endlessly running code */
-void loop(void) {  
+/* My Functions */
+void readCard(void) {
   /* Test whether a card is present */
   if (reader.PICC_IsNewCardPresent()) {
       uint8_t card_uid[UID_WIDTH];
@@ -57,6 +43,28 @@ void loop(void) {
 // END OF DEBUG      
       /* END of READING */
       reader.PICC_HaltA();
+}
+
+/* Execution order */
+
+/* Init (Executed once) Code */
+void setup(void) {
+  reader.PCD_Init(); /* start reader */
+  //reader.PCD_SetAntennaGain(reader.RxGain_max); /* extend Antenna's reading range */
+
+// DEBUG
+  Serial.begin(9600);
+// END OF DEBUG
+
+  /* set all OUTPUT pins as OUTPUT */
+  for (auto pin : output_pins) 
+    pinMode(pin, OUTPUT);
+}
+
+/* Endlessly running code */
+void loop(void) { 
+
+  readCard();
 
 // TODO start the PC with "PWR_BTN" pin
   }
